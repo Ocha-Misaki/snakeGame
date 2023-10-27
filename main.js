@@ -38,41 +38,68 @@
       this.canvas = document.getElementById("canvasId")
       this.context = this.context = this.canvas.getContext("2d")
       this.snake = new Snake()
+      this.snakeDirection = "right"
       this.init()
     }
     init() {
-      //キーを受けつけたら、上下左右に動くようにする
-      //updateとdrawを押されるたびに呼び出す
       document.addEventListener("keydown", (e) => {
-        this.context.clearRect(0, 0, canvas_vertical, canvas_beside)
-        const tipsCell = this.snake.cells[0]
         switch (e.keyCode) {
           case 37: //左
-            this.snake.cells.pop()
-            this.snake.cells.unshift(new Cell(tipsCell.x - 1, tipsCell.y))
+            if (this.snakeDirection !== "right") {
+              this.snakeDirection = "left"
+            }
             break
           case 38: //上
-            this.snake.cells.pop()
-            this.snake.cells.unshift(new Cell(tipsCell.x, tipsCell.y - 1))
+            if (this.snakeDirection !== "down") {
+              this.snakeDirection = "up"
+            }
             break
           case 39: //右
-            this.snake.cells.pop()
-            this.snake.cells.unshift(new Cell(tipsCell.x + 1, tipsCell.y))
+            if (this.snakeDirection !== "left") {
+              this.snakeDirection = "right"
+            }
             break
           case 40: //下
-            this.snake.cells.pop()
-            this.snake.cells.unshift(new Cell(tipsCell.x, tipsCell.y + 1))
+            if (this.snakeDirection !== "up") {
+              this.snakeDirection = "down"
+            }
             break
         }
-        this.draw()
       })
     }
-    update() {}
+    set() {
+      setInterval(() => {
+        this.update()
+        this.draw()
+      }, 1000)
+    }
+    update() {
+      this.context.clearRect(0, 0, canvas_vertical, canvas_beside)
+      const tipsCell = this.snake.cells[0]
+      switch (this.snakeDirection) {
+        case "left":
+          this.snake.cells.pop()
+          this.snake.cells.unshift(new Cell(tipsCell.x - 1, tipsCell.y))
+          break
+        case "up":
+          this.snake.cells.pop()
+          this.snake.cells.unshift(new Cell(tipsCell.x, tipsCell.y - 1))
+          break
+        case "right":
+          this.snake.cells.pop()
+          this.snake.cells.unshift(new Cell(tipsCell.x + 1, tipsCell.y))
+          break
+        case "down":
+          this.snake.cells.pop()
+          this.snake.cells.unshift(new Cell(tipsCell.x, tipsCell.y + 1))
+          break
+      }
+    }
     draw() {
       this.snake.draw()
     }
   }
 
   const board = new Board()
-  board.draw()
+  board.set()
 }
