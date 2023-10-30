@@ -8,10 +8,10 @@
   canvasId.width = canvas_beside
   canvasId.height = canvas_vertical
 
-  const drawCell = (_x, _y, context) => {
+  const drawCell = (_x, _y, context, color = "green") => {
     let px = _x * block_size
     let py = _y * block_size
-    context.fillStyle = "green"
+    context.fillStyle = color
     context.fillRect(px, py, block_size, block_size)
     context.strokeRect(px, py, block_size, block_size)
   }
@@ -65,21 +65,17 @@
       this.context = this.context = this.canvas.getContext("2d")
       this.randX = rand(0, field_beside)
       this.randY = rand(field_vertical / 2, field_vertical)
-      this.visible = true
     }
     hitSnake(snake) {
       //snakeに衝突した時の処理を書く
       //booleanで返すのが良さそう？
-
       if (this.randX == snake.cells[0].x && this.randY == snake.cells[0].y) {
         return true
       }
       return false
     }
     draw() {
-      if (this.visible == true) {
-        drawCell(this.randX, this.randY, this.context)
-      }
+      drawCell(this.randX, this.randY, this.context, "red")
     }
   }
 
@@ -102,7 +98,22 @@
         switch (e.keyCode) {
           case 37: //左
             if (this.snakeDirection !== "right") {
+              keyLogs.push("left")
+              // updateのときに
+              if (keyLogs.length > 0) {
+                this.snakeDirection = keyLogs[0]
+              }
+            }
+            ////////
+            if (this.snakeDirection !== "right") {
               this.snakeDirection = "left"
+              //keyLogs.push('left)
+              // updateのときに
+              /*
+              keyLogs.filter(key => {
+                === 'right' ? key !== 'left'
+              })[0]
+            */
             }
             break
           case 38: //上
@@ -127,7 +138,7 @@
       this.intervalId = setInterval(() => {
         this.update()
         this.draw()
-      }, 800)
+      }, 500)
     }
     update() {
       this.context.clearRect(0, 0, canvas_vertical, canvas_beside)
@@ -141,14 +152,14 @@
       ) {
         clearInterval(this.intervalId)
         this.gameOver = true
+        confirm("game over")
       } else {
         this.snake.cells.pop()
         this.snake.cells.unshift(new Cell(ptFuture.x, ptFuture.y))
       }
 
-
       if (this.item.hitSnake(this.snake) == true) {
-        this.item.visible = false //うまく動いていない
+        this.item = new Item()
         //蛇を伸ばす
         const lastCell = this.snake.cells[this.snake.cells.length - 1]
         this.snake.cells.push(new Cell(lastCell.x - 1, lastCell.y))
