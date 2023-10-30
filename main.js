@@ -1,8 +1,10 @@
 "use strict"
 {
   const block_size = 20
-  const canvas_vertical = 400
-  const canvas_beside = 400
+  const field_vertical = 20
+  const canvas_vertical = block_size * field_vertical
+  const field_beside = 20
+  const canvas_beside = block_size * field_beside
   canvasId.width = canvas_beside
   canvasId.height = canvas_vertical
 
@@ -39,9 +41,14 @@
       this.context = this.context = this.canvas.getContext("2d")
       this.snake = new Snake()
       this.snakeDirection = "right"
+      this.intervalId = undefined
+      this.gameOver = false
       this.init()
     }
     init() {
+      if (this.gameOver == true) {
+        return
+      }
       document.addEventListener("keydown", (e) => {
         switch (e.keyCode) {
           case 37: //左
@@ -68,7 +75,7 @@
       })
     }
     set() {
-      setInterval(() => {
+      this.intervalId = setInterval(() => {
         this.update()
         this.draw()
       }, 1000)
@@ -94,8 +101,18 @@
           this.snake.cells.unshift(new Cell(tipsCell.x, tipsCell.y + 1))
           break
       }
+      if (
+        this.snake.cells[0].x + 1 >= field_beside ||
+        this.snake.cells[0].y + 1 >= field_vertical
+      ) {
+        clearInterval(this.intervalId)
+        this.gameOver = true
+      }
     }
     draw() {
+      //boardの描画
+      this.context.fillStyle = "black"
+      this.context.fillRect(0, 0, canvas_beside, canvas_vertical)
       this.snake.draw()
     }
   }
