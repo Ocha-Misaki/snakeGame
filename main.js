@@ -15,6 +15,14 @@
     context.fillRect(px, py, block_size, block_size)
     context.strokeRect(px, py, block_size, block_size)
   }
+  const rand = (min, max) => {
+    if (max < min) {
+      copyMin = min
+      max = copyMin
+      min = max
+    }
+    return Math.floor(Math.random() * (max - min) + min)
+  }
   class Snake {
     constructor() {
       this.canvas = document.getElementById("canvasId")
@@ -35,6 +43,22 @@
     }
   }
 
+  class Item {
+    constructor() {
+      this.canvas = document.getElementById("canvasId")
+      this.context = this.context = this.canvas.getContext("2d")
+      this.randX = rand(0, field_beside)
+      this.randY = rand(field_vertical / 2, field_vertical)
+    }
+    hitSnake() {
+      //snakeに衝突した時の処理を書く
+      //booleanで返すのが良さそう？
+    }
+    draw() {
+      drawCell(this.randX, this.randY, this.context)
+    }
+  }
+
   class Board {
     constructor() {
       this.canvas = document.getElementById("canvasId")
@@ -42,6 +66,7 @@
       this.snake = new Snake()
       this.snakeDirection = "right"
       this.intervalId = undefined
+      this.item = new Item()
       this.gameOver = false
       this.init()
     }
@@ -114,6 +139,7 @@
       this.context.fillStyle = "black"
       this.context.fillRect(0, 0, canvas_beside, canvas_vertical)
       this.snake.draw()
+      this.item.draw()
     }
   }
 
