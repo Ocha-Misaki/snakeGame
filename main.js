@@ -34,6 +34,22 @@
         drawCell(cell.x, cell.y, this.context)
       })
     }
+    futurePoint(snakeDirection) {
+      const head = this.cells[0]
+      switch (snakeDirection) {
+        case "left":
+          return { x: head.x - 1, y: head.y }
+
+        case "up":
+          return { x: head.x, y: head.y - 1 }
+
+        case "right":
+          return { x: head.x + 1, y: head.y }
+
+        case "down":
+          return { x: head.x, y: head.y + 1 }
+      }
+    }
   }
 
   class Cell {
@@ -49,13 +65,21 @@
       this.context = this.context = this.canvas.getContext("2d")
       this.randX = rand(0, field_beside)
       this.randY = rand(field_vertical / 2, field_vertical)
+      this.visible = true
     }
-    hitSnake() {
+    hitSnake(snake) {
       //snakeに衝突した時の処理を書く
       //booleanで返すのが良さそう？
+
+      if (this.randX == snake.cells[0].x && this.randY == snake.cells[0].y) {
+        return true
+      }
+      return false
     }
     draw() {
-      drawCell(this.randX, this.randY, this.context)
+      if (this.visible == true) {
+        drawCell(this.randX, this.randY, this.context)
+      }
     }
   }
 
@@ -103,35 +127,31 @@
       this.intervalId = setInterval(() => {
         this.update()
         this.draw()
-      }, 1000)
+      }, 800)
     }
     update() {
       this.context.clearRect(0, 0, canvas_vertical, canvas_beside)
-      const tipsCell = this.snake.cells[0]
-      switch (this.snakeDirection) {
-        case "left":
-          this.snake.cells.pop()
-          this.snake.cells.unshift(new Cell(tipsCell.x - 1, tipsCell.y))
-          break
-        case "up":
-          this.snake.cells.pop()
-          this.snake.cells.unshift(new Cell(tipsCell.x, tipsCell.y - 1))
-          break
-        case "right":
-          this.snake.cells.pop()
-          this.snake.cells.unshift(new Cell(tipsCell.x + 1, tipsCell.y))
-          break
-        case "down":
-          this.snake.cells.pop()
-          this.snake.cells.unshift(new Cell(tipsCell.x, tipsCell.y + 1))
-          break
-      }
+
+      const ptFuture = this.snake.futurePoint(this.snakeDirection)
       if (
-        this.snake.cells[0].x + 1 >= field_beside ||
-        this.snake.cells[0].y + 1 >= field_vertical
+        ptFuture.x < 0 ||
+        ptFuture.y < 0 ||
+        ptFuture.x >= field_beside - 1 ||
+        ptFuture.y >= field_vertical - 1
       ) {
         clearInterval(this.intervalId)
         this.gameOver = true
+      } else {
+        this.snake.cells.pop()
+        this.snake.cells.unshift(new Cell(ptFuture.x, ptFuture.y))
+      }
+
+
+      if (this.item.hitSnake(this.snake) == true) {
+        this.item.visible = false //うまく動いていない
+        //蛇を伸ばす
+        const lastCell = this.snake.cells[this.snake.cells.length - 1]
+        this.snake.cells.push(new Cell(lastCell.x - 1, lastCell.y))
       }
     }
     draw() {
