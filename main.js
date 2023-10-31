@@ -27,12 +27,14 @@
     constructor() {
       this.canvas = document.getElementById("canvasId")
       this.context = this.context = this.canvas.getContext("2d")
-      this.cells = [new Cell(3, 0), new Cell(2, 0), new Cell(1, 0)]
-    }
-    draw() {
-      this.cells.forEach((cell) => {
-        drawCell(cell.x, cell.y, this.context)
-      })
+      this.cells = [
+        new Cell(6, 0),
+        new Cell(5, 0),
+        new Cell(4, 0),
+        new Cell(3, 0),
+        new Cell(2, 0),
+        new Cell(1, 0),
+      ]
     }
     futurePoint(snakeDirection) {
       const head = this.cells[0]
@@ -50,6 +52,18 @@
           return { x: head.x, y: head.y + 1 }
       }
     }
+    hitBody() {
+      console.log(
+        this.cells.every((cell) => {
+          cell.x == this.cells[0].x && cell.y == this.cells[0].y
+        })
+      )
+    }
+    draw() {
+      this.cells.forEach((cell) => {
+        drawCell(cell.x, cell.y, this.context)
+      })
+    }
   }
 
   class Cell {
@@ -62,13 +76,11 @@
   class Item {
     constructor() {
       this.canvas = document.getElementById("canvasId")
-      this.context = this.context = this.canvas.getContext("2d")
+      this.context = this.canvas.getContext("2d")
       this.randX = rand(0, field_beside)
       this.randY = rand(field_vertical / 2, field_vertical)
     }
-    hitSnake(snake) {
-      //snakeに衝突した時の処理を書く
-      //booleanで返すのが良さそう？
+    hit(snake) {
       if (this.randX == snake.cells[0].x && this.randY == snake.cells[0].y) {
         return true
       }
@@ -97,6 +109,7 @@
       }
       document.addEventListener("keydown", (e) => {
         if (this.keyLogs.length > 0) {
+          //配列の中身を一旦初期化する
           this.keyLogs = []
         }
         switch (e.keyCode) {
@@ -131,15 +144,18 @@
     }
     update() {
       this.context.clearRect(0, 0, canvas_vertical, canvas_beside)
+
       if (this.keyLogs.length > 0) {
         this.snakeDirection = this.keyLogs[0]
       }
+
       const ptFuture = this.snake.futurePoint(this.snakeDirection)
       if (
         ptFuture.x < 0 ||
         ptFuture.y < 0 ||
         ptFuture.x > field_beside - 1 ||
-        ptFuture.y > field_vertical - 1
+        ptFuture.y > field_vertical - 1 ||
+        this.snake.hitBody() == true
       ) {
         clearInterval(this.intervalId)
         this.gameOver = true
@@ -149,7 +165,7 @@
         this.snake.cells.unshift(new Cell(ptFuture.x, ptFuture.y))
       }
 
-      if (this.item.hitSnake(this.snake) == true) {
+      if (this.item.hit(this.snake) == true) {
         this.item = new Item()
         //蛇を伸ばす
         const lastCell = this.snake.cells[this.snake.cells.length - 1]
