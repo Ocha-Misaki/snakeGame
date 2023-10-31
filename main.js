@@ -85,6 +85,7 @@
       this.context = this.context = this.canvas.getContext("2d")
       this.snake = new Snake()
       this.snakeDirection = "right"
+      this.keyLogs = []
       this.intervalId = undefined
       this.item = new Item()
       this.gameOver = false
@@ -95,40 +96,28 @@
         return
       }
       document.addEventListener("keydown", (e) => {
+        if (this.keyLogs.length > 0) {
+          this.keyLogs = []
+        }
         switch (e.keyCode) {
           case 37: //左
             if (this.snakeDirection !== "right") {
-              keyLogs.push("left")
-              // updateのときに
-              if (keyLogs.length > 0) {
-                this.snakeDirection = keyLogs[0]
-              }
-            }
-            ////////
-            if (this.snakeDirection !== "right") {
-              this.snakeDirection = "left"
-              //keyLogs.push('left)
-              // updateのときに
-              /*
-              keyLogs.filter(key => {
-                === 'right' ? key !== 'left'
-              })[0]
-            */
+              this.keyLogs.push("left")
             }
             break
           case 38: //上
             if (this.snakeDirection !== "down") {
-              this.snakeDirection = "up"
+              this.keyLogs.push("up")
             }
             break
           case 39: //右
             if (this.snakeDirection !== "left") {
-              this.snakeDirection = "right"
+              this.keyLogs.push("right")
             }
             break
           case 40: //下
             if (this.snakeDirection !== "up") {
-              this.snakeDirection = "down"
+              this.keyLogs.push("down")
             }
             break
         }
@@ -142,13 +131,15 @@
     }
     update() {
       this.context.clearRect(0, 0, canvas_vertical, canvas_beside)
-
+      if (this.keyLogs.length > 0) {
+        this.snakeDirection = this.keyLogs[0]
+      }
       const ptFuture = this.snake.futurePoint(this.snakeDirection)
       if (
         ptFuture.x < 0 ||
         ptFuture.y < 0 ||
-        ptFuture.x >= field_beside - 1 ||
-        ptFuture.y >= field_vertical - 1
+        ptFuture.x > field_beside - 1 ||
+        ptFuture.y > field_vertical - 1
       ) {
         clearInterval(this.intervalId)
         this.gameOver = true
@@ -162,7 +153,7 @@
         this.item = new Item()
         //蛇を伸ばす
         const lastCell = this.snake.cells[this.snake.cells.length - 1]
-        this.snake.cells.push(new Cell(lastCell.x - 1, lastCell.y))
+        this.snake.cells.push(new Cell(lastCell.x, lastCell.y))
       }
     }
     draw() {
